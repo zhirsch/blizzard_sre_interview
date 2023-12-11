@@ -1,0 +1,60 @@
+Blizzard SRE Take-Home Case Study
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Option 1: Software Engineering
+------------------------------
+
+This Python script implements a server that accepts HTTP requests and returns 10
+Hearthstone cards that match the following criteria:
+
+  * Either a Druid or Warlock
+  * Costs at least 7 mana
+  * Legendary rarity
+
+This is done by performing two requests: one to get the Druid cards matching
+the above criteria, and another to get the Warlock cards matching the criteria.
+Then, this server combines the two lists of cards, selects 10 random ones, sorts
+them by their id, and returns an HTML page describing them.
+
+
+Known limitations of this implementation:
+
+  * Only the first page of Warlock and Druid cards are considered (but this
+    seems OK, since there is currently only a single page of each class for the
+    criteria).
+  * Every request to this server results in 2 requests to the Blizzard API
+    servers, even though the Hearthstone card information probably doesn't
+    change that often. Some form of caching would be nice.
+  * Neither the OAuth session nor the metadata are refreshed.
+  * Minimal error handling. If something goes wrong, the user experience is not
+    ideal (an HTTP 500 error is returned most likely).
+
+Along the way, I noticed an omission(?) in the Hearthstone API: set id 3 is not
+returned from the /hearthstone/metadata/sets endpoint.  This appears to effect
+only two cards that could be returned from this server: 36-cenarius and
+777-lord-jaraxxus. From looking at the Hearthstone card browser, it seems that
+set id 3 is "Legacy", so I hard coded that value into the server.
+
+
+Required Python libaries:
+
+  * Flask
+  * Jinja2
+  * requests
+  * requests-oauthlib
+
+These can all be installed with:
+  
+  pip3 install flask Jinja2 requests requests-oauthlib
+
+
+Usage:
+
+  python3 hearthstone.py <client id> <client secret> [<locale>]
+
+The locale defaults to en_US.
+
+The output of the server can be viewed by navigating to http://localhost:5000 on
+the same system that the server is running on.
+
+NOTE: Only tested on Windows.
